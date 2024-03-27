@@ -32,6 +32,23 @@ def save_thank_you_letter(id,form_letter)
   end
 end
 
+def clean_phone_number(phone,vaild_phone)
+
+  clean_phone = phone.gsub(/[!. ()E+-]/,"") 
+
+  if clean_phone.length < 10
+    p "#{clean_phone} is a bad number"
+  elsif clean_phone.length == 11 && clean_phone[0] == "1"
+    vaild_phone << clean_phone[1..-1]
+  elsif clean_phone.length == 11 && clean_phone[0] != "1"
+    p "#{clean_phone} is bad cus 1st number isn't 1"
+  elsif clean_phone.length > 11
+    p "#{clean_phone} is bad cus its grater than 11"
+  else
+    vaild_phone << clean_phone
+  end
+end
+
 puts 'EventManager initialized.'
 
 contents = CSV.open(
@@ -46,35 +63,18 @@ vaild_phone = []
 
 contents.each do |row|
   id = row[0]
-  phone = row[5]
-  
+  phone = row[5] 
   name = row[:first_name]
 
   zipcode = clean_zipcode(row[:zipcode])
 
   legislators = legislators_by_zipcode(zipcode)
 
-  clean_phone = phone.gsub(/[!. ()E+-]/,"")
-
-
-  if clean_phone.length < 10
-    p "#{clean_phone} is a bad number"
-  elsif clean_phone.length == 11 && clean_phone[0] == "1"
-    vaild_phone << clean_phone[1..-1]
-  elsif clean_phone.length == 11 && clean_phone[0] != "1"
-    p "#{clean_phone} is bad cus 1st number isn't 1"
-  elsif clean_phone.length > 11
-    p "#{clean_phone} is bad cus its grater than 11"
-  else
-    vaild_phone << clean_phone
-  end
-
-
-
+  clean_phone_number(phone,vaild_phone)
 
   form_letter = erb_template.result(binding)
   
   save_thank_you_letter(id,form_letter)
 end
 
-p "#{vaild_phone}"
+p "#{vaild_phone} are subscribed"
