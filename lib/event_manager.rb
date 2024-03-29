@@ -61,6 +61,12 @@ def find_average_hour(date_array)
   avg_hour = hour.sum/hour.length
 end
 
+def find_average_day(date)
+  day = []
+  date.each {|week| day << week.wday }
+  avg_day = day.sum/day.length
+end
+
 puts 'EventManager initialized.'
 
 contents = CSV.open(
@@ -93,4 +99,6 @@ contents.each do |row|
   
   save_thank_you_letter(id,form_letter)
 end
+
+p "Most people registered on the #{find_average_day(date)}  day of the week"
 p "The average date is #{find_average_hour(date)}"
