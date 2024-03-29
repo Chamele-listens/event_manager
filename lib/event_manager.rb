@@ -1,6 +1,7 @@
 require 'csv'
 require 'google/apis/civicinfo_v2'
 require 'erb'
+require 'date'
 
 def clean_zipcode(zipcode)
     zipcode.to_s.rjust(5, '0')[0..4]
@@ -49,6 +50,17 @@ def clean_phone_number(phone,vaild_phone)
   end
 end
 
+def parse_date(date_time,date)
+  temp_date = Date.strptime(date_time[0],"%y/%d/%m")
+  date << DateTime.parse("#{temp_date.day}/#{temp_date.month}/#{temp_date.year} #{date_time[1]}")
+end
+
+def find_average_hour(date_array)
+  hour = []
+  date_array.each {|date_temp2| hour << date_temp2.hour}
+  avg_hour = hour.sum/hour.length
+end
+
 puts 'EventManager initialized.'
 
 contents = CSV.open(
@@ -60,11 +72,14 @@ contents = CSV.open(
 template_letter = File.read('form_letter.erb')
 erb_template = ERB.new template_letter
 vaild_phone = []
+date = []
 
 contents.each do |row|
   id = row[0]
   phone = row[5] 
   name = row[:first_name]
+  date_time = row[1].split(" ")
+  
 
   zipcode = clean_zipcode(row[:zipcode])
 
@@ -72,9 +87,10 @@ contents.each do |row|
 
   clean_phone_number(phone,vaild_phone)
 
+  parse_date(date_time,date)  
+
   form_letter = erb_template.result(binding)
   
   save_thank_you_letter(id,form_letter)
 end
-
-p "#{vaild_phone} are subscribed"
+p "The average date is #{find_average_hour(date)}"
